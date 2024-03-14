@@ -1,38 +1,63 @@
 <script>
-	import Greet from './lib/Greet.svelte'
+	import {
+		Column,
+		ColumnType,
+		Index,
+		IndexedColumn,
+		Schema,
+		Table,
+		WASQLitePowerSyncDatabaseOpenFactory,
+	} from '@journeyapps/powersync-sdk-web';
+
+	export const AppSchema = new Schema([
+		new Table({
+			name: 'todos',
+			columns: [
+				new Column({ name: 'list_id', type: ColumnType.TEXT }),
+				new Column({ name: 'created_at', type: ColumnType.TEXT }),
+				new Column({ name: 'completed_at', type: ColumnType.TEXT }),
+				new Column({ name: 'description', type: ColumnType.TEXT }),
+				new Column({ name: 'completed', type: ColumnType.INTEGER }),
+				new Column({ name: 'created_by', type: ColumnType.TEXT }),
+				new Column({ name: 'completed_by', type: ColumnType.TEXT })
+			],
+			indexes: [new Index({ name: 'list', columns: [new IndexedColumn({ name: 'list_id' })] })]
+		}),
+		new Table({
+			name: 'lists',
+			columns: [
+				new Column({ name: 'id', type: ColumnType.TEXT }),
+				new Column({ name: 'name', type: ColumnType.TEXT }),
+			]
+		})
+	]);
+
+	const factory = new WASQLitePowerSyncDatabaseOpenFactory({
+		schema: AppSchema, // Which was created earlier
+		dbFilename: 'test.sqlite'
+	});
+
+	let PowerSync = factory.getInstance();
+
+	async function setupPowerSync() {
+		let result
+
+		console.log('before powersync init')
+
+		await PowerSync.init();
+
+		console.log('after powersync init')
+
+		result = await PowerSync.execute(`insert into lists (id, name) values (uuid(), 'list0')`)
+		console.log('insert result: ', result)
+
+		result = await PowerSync.execute('select * from lists')
+		console.log('select result: ', result)
+	}
+
+	setupPowerSync()
 </script>
 
 <main class="container">
-	<h1>Welcome to Tauri!</h1>
-
-	<div class="row">
-		<a href="https://vitejs.dev" target="_blank">
-			<img src="/vite.svg" class="logo vite" alt="Vite Logo" />
-		</a>
-		<a href="https://tauri.app" target="_blank">
-			<img src="/tauri.svg" class="logo tauri" alt="Tauri Logo" />
-		</a>
-		<a href="https://svelte.dev" target="_blank">
-			<img src="/svelte.svg" class="logo svelte" alt="Svelte Logo" />
-		</a>
-	</div>
-
-	<p>
-		Click on the Tauri, Vite, and Svelte logos to learn more.
-	</p>
-
-	<div class="row">
-		<Greet />
-	</div>
-
+	Demo of tauri + svelte + powersync
 </main>
-
-<style>
-	.logo.vite:hover {
-		filter: drop-shadow(0 0 2em #747bff);
-	}
-
-	.logo.svelte:hover {
-		filter: drop-shadow(0 0 2em #ff3e00);
-	}
-</style>

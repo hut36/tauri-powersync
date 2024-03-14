@@ -10,6 +10,7 @@
 		"tauri": "tauri"
 	},
 	"dependencies": {
+		"@journeyapps/powersync-sdk-web": "^0.3.0",
 		"@tauri-apps/api": "^1"
 	},
 	"devDependencies": {
